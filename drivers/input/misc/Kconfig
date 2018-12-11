@@ -777,73 +777,6 @@ config INPUT_DRV2667_HAPTICS
 	  To compile this driver as a module, choose M here: the
 	  module will be called drv260x-haptics.
 
-<<<<<<< HEAD
-config STMVL53L0
-	tristate "STMVL53L0 support"
-	help
-	laser sensor driver.
-
-config SENSORS_FPC_1020
-	tristate "fpc fingerprint sensor"
-	default n
-	help
-	 Say Y here if you wish to include support for finger print sensor.
-	 If unsure, say N.
-
-config INPUT_EGISTEC_320
-	tristate "Egistec ET320 fingerprint sensor"
-	default n
-	help
-	 Say Y here if you wish to include support for EGIS finger print sensor.
-	 If unsure, say N.
-
-config INPUT_SX9310
-	tristate "SX9310_SAR_sensor"
-	depends on I2C
-	default n
-	help
-	  Say Y to enable the SAR detection application, if N here not to use the
-	  this SAR sensor.
-
-config SENSORS_BMA25X
-	tristate "BMA25X acceleration sensor support"
-	depends on I2C
-        default n
-	help
-	  If you say yes here, you get support for Bosch Sensortec's
-	  acceleration sensors BMA253.
-
-config SENSORS_BMA25X_ENABLE_INT1
-	tristate "BMA25X acceleration sensor interrupt INT1 support"
-	depends on SENSORS_BMA25X
-	help
-	 If you say yes here, you get INT1 support for Bosch Sensortec
-	 acceleration sensors BMA253.
-	 Select it will disable interrupt INT2 support
-
-config SENSORS_BMA25X_ENABLE_INT2
-	tristate "BMA25X acceleration sensor interrupt INT2 support"
-	depends on SENSORS_BMA25X && !SENSORS_BMA25X_ENABLE_INT1
-	help
-	 If you say yes here, you get INT2 support for Bosch Sensortec
-	 acceleration sensors BMA253.
-	 Can only open if you do NOT open interrupt INT1 support
-
-config SENSORS_AKM09911
-	tristate "AKM09911 3-axis electronic compass sensor driver"
-	depends on I2C
-	help
-	  Say Y here if you want to enable the akm09911 ecompass sensor
-	  driver.
-
-	  To compile this driver as a module, choose M here: the
-	  module will be called akm09911.
-
-config STMVL53L1
-	tristate "STMVL53L1 support"
-	help
-	  Say Y here if you wish to include support for laser sensor driver.
-=======
 source "drivers/input/misc/ots_pat9125/Kconfig"
 
 config SENSORS_LTR553
@@ -891,7 +824,6 @@ config DOUBLE_TAP
 	help
 	 If you say yes here, you get support Bosch double tap sensor function
 
->>>>>>> e5677e4cee63b5c049c2f32f1bd5f12a821f23fe
 endif
 
 config EPL8802
