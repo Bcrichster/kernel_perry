@@ -41,6 +41,10 @@ static DEFINE_MUTEX(bst_mutex);
 static void bst_dev_release(struct device *device)
 {
 	struct bst_dev *dev = to_bst_dev(device);
+<<<<<<< HEAD
+=======
+
+>>>>>>> e5677e4cee63b5c049c2f32f1bd5f12a821f23fe
 	if (NULL != dev)
 		kfree(dev);
 	module_put(THIS_MODULE);

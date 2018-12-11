@@ -1558,7 +1558,11 @@ static int elantech_set_properties(struct elantech_data *etd)
 		case 5:
 			etd->hw_version = 3;
 			break;
+<<<<<<< HEAD
 		case 6 ... 15:
+=======
+		case 6 ... 14:
+>>>>>>> e5677e4cee63b5c049c2f32f1bd5f12a821f23fe
 			etd->hw_version = 4;
 			break;
 		default:

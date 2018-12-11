@@ -555,6 +555,12 @@ static void smaps_pte_entry(pte_t *pte, unsigned long addr,
 
 	smaps_account(mss, page, PAGE_SIZE, pte_young(*pte), pte_dirty(*pte));
 }
+#else
+static void smaps_pmd_entry(pmd_t *pmd, unsigned long addr,
+		struct mm_walk *walk)
+{
+}
+#endif
 
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
 static void smaps_pmd_entry(pmd_t *pmd, unsigned long addr,
@@ -1494,6 +1500,9 @@ struct reclaim_param reclaim_task_anon(struct task_struct *task,
 			continue;
 
 		if (vma->vm_file)
+			continue;
+
+		if (vma->vm_flags & VM_LOCKED)
 			continue;
 
 		if (!rp.nr_to_reclaim)

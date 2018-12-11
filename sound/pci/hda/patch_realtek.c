@@ -4683,7 +4683,6 @@ enum {
 	ALC286_FIXUP_HP_GPIO_LED,
 	ALC280_FIXUP_HP_GPIO2_MIC_HOTKEY,
 	ALC280_FIXUP_HP_DOCK_PINS,
-	ALC269_FIXUP_HP_DOCK_GPIO_MIC1_LED,
 	ALC280_FIXUP_HP_9480M,
 	ALC288_FIXUP_DELL_HEADSET_MODE,
 	ALC288_FIXUP_DELL1_MIC_NO_PRESENCE,
@@ -5216,16 +5215,6 @@ static const struct hda_fixup alc269_fixups[] = {
 		},
 		.chained = true,
 		.chain_id = ALC280_FIXUP_HP_GPIO4
-	},
-	[ALC269_FIXUP_HP_DOCK_GPIO_MIC1_LED] = {
-		.type = HDA_FIXUP_PINS,
-		.v.pins = (const struct hda_pintbl[]) {
-			{ 0x1b, 0x21011020 }, /* line-out */
-			{ 0x18, 0x2181103f }, /* line-in */
-			{ },
-		},
-		.chained = true,
-		.chain_id = ALC269_FIXUP_HP_GPIO_MIC1_LED
 	},
 	[ALC280_FIXUP_HP_9480M] = {
 		.type = HDA_FIXUP_FUNC,
@@ -6493,7 +6482,6 @@ enum {
 	ALC668_FIXUP_DELL_DISABLE_AAMIX,
 	ALC668_FIXUP_DELL_XPS13,
 	ALC662_FIXUP_ASUS_Nx50,
-	ALC668_FIXUP_ASUS_Nx51_HEADSET_MODE,
 	ALC668_FIXUP_ASUS_Nx51,
 };
 
@@ -6741,21 +6729,14 @@ static const struct hda_fixup alc662_fixups[] = {
 		.chained = true,
 		.chain_id = ALC662_FIXUP_BASS_1A
 	},
-	[ALC668_FIXUP_ASUS_Nx51_HEADSET_MODE] = {
-		.type = HDA_FIXUP_FUNC,
-		.v.func = alc_fixup_headset_mode_alc668,
-		.chain_id = ALC662_FIXUP_BASS_CHMAP
-	},
 	[ALC668_FIXUP_ASUS_Nx51] = {
 		.type = HDA_FIXUP_PINS,
 		.v.pins = (const struct hda_pintbl[]) {
-			{ 0x19, 0x03a1913d }, /* use as headphone mic, without its own jack detect */
-			{ 0x1a, 0x90170151 }, /* bass speaker */
-			{ 0x1b, 0x03a1113c }, /* use as headset mic, without its own jack detect */
+			{0x1a, 0x90170151}, /* bass speaker */
 			{}
 		},
 		.chained = true,
-		.chain_id = ALC668_FIXUP_ASUS_Nx51_HEADSET_MODE,
+		.chain_id = ALC662_FIXUP_BASS_CHMAP,
 	},
 };
 

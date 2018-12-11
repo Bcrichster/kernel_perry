@@ -201,25 +201,10 @@ dont_backup_fp:
 
 	std	r11, GPR11(r1)			/* Temporary stash */
 
-	/*
-	 * Move the saved user r1 to the kernel stack in case PACATMSCRATCH is
-	 * clobbered by an exception once we turn on MSR_RI below.
-	 */
-	ld	r11, PACATMSCRATCH(r13)
-	std	r11, GPR1(r1)
-
-	/*
-	 * Store r13 away so we can free up the scratch SPR for the SLB fault
-	 * handler (needed once we start accessing the thread_struct).
-	 */
-	GET_SCRATCH0(r11)
-	std	r11, GPR13(r1)
-
 	/* Reset MSR RI so we can take SLB faults again */
 	li	r11, MSR_RI
 	mtmsrd	r11, 1
 
-	/* Store the PPR in r11 and reset to decent value */
 	mfspr	r11, SPRN_PPR
 	HMT_MEDIUM
 

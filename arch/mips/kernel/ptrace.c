@@ -543,14 +543,8 @@ static int fpr_set(struct task_struct *target,
 	if (pos + count > sizeof(elf_fpregset_t))
 		return -EIO;
 
-	if (sizeof(target->thread.fpu.fpr[0]) == sizeof(elf_fpreg_t))
-		err = fpr_set_fpa(target, &pos, &count, &kbuf, &ubuf);
-	else
-		err = fpr_set_msa(target, &pos, &count, &kbuf, &ubuf);
-	if (err)
-		return err;
-
-	if (count > 0) {
+	BUILD_BUG_ON(sizeof(fpr_val) != sizeof(elf_fpreg_t));
+	for (i = 0; i < NUM_FPU_REGS && count >= sizeof(elf_fpreg_t); i++) {
 		err = user_regset_copyin(&pos, &count, &kbuf, &ubuf,
 					 &fcr31,
 					 fcr31_pos, fcr31_pos + sizeof(u32));
