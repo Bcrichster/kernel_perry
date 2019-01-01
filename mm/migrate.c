@@ -890,21 +890,6 @@ static int __unmap_and_move(struct page *page, struct page *newpage,
 		}
 	}
 
-	if (unlikely(mobile_page(page))) {
-		/*
-		 * A mobile page does not need any special attention from
-		 * physical to virtual reverse mapping procedures.
-		 * Skip any attempt to unmap PTEs or to remap swap cache,
-		 * in order to avoid burning cycles at rmap level, and perform
-		 * the page migration right away (proteced by page lock).
-		 */
-		lock_page(newpage);
-		rc = page->mapping->a_ops->migratepage(page->mapping,
-						       newpage, page, mode);
-		unlock_page(newpage);
-		goto out_unlock;
-	}
-
 	if (unlikely(isolated_balloon_page(page))) {
 		/*
 		 * A ballooned page does not need any special attention from
@@ -1012,15 +997,6 @@ out:
 		put_page(newpage);
 	} else
 		putback_lru_page(newpage);
-complete:
-	if (result) {
-		if (rc)
-			*result = rc;
-		else
-			*result = page_to_nid(newpage);
-	}
-	return rc;
-}
 
 /*
  * Counterpart of unmap_and_move_page() for hugepage migration.
