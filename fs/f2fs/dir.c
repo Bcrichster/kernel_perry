@@ -118,9 +118,7 @@ struct f2fs_dir_entry *find_target_dentry(struct fscrypt_name *fname,
 	struct f2fs_dir_entry *de;
 	unsigned long bit_pos = 0;
 	int max_len = 0;
-	struct f2fs_str de_name = FSTR_INIT(NULL, 0);
-	struct f2fs_str *name = &fname->disk_name;
-
+	
 	if (max_slots)
 		*max_slots = 0;
 	while (bit_pos < d->max) {
@@ -216,8 +214,6 @@ struct f2fs_dir_entry *__f2fs_find_entry(struct inode *dir,
 	struct f2fs_dir_entry *de = NULL;
 	unsigned int max_depth;
 	unsigned int level;
-	struct f2fs_filename fname;
-	int err;
 
 	if (f2fs_has_inline_dentry(dir)) {
 		*res_page = NULL;
@@ -343,29 +339,6 @@ void do_make_empty_dir(struct inode *inode, struct inode *parent,
 
 	/* update dirent of ".." */
 	f2fs_update_dentry(parent->i_ino, parent->i_mode, d, &dotdot, 0, 1);
-}
-
-void do_make_empty_dir(struct inode *inode, struct inode *parent,
-					struct f2fs_dentry_ptr *d)
-{
-	struct f2fs_dir_entry *de;
-
-	de = &d->dentry[0];
-	de->name_len = cpu_to_le16(1);
-	de->hash_code = 0;
-	de->ino = cpu_to_le32(inode->i_ino);
-	memcpy(d->filename[0], ".", 1);
-	set_de_type(de, inode->i_mode);
-
-	de = &d->dentry[1];
-	de->hash_code = 0;
-	de->name_len = cpu_to_le16(2);
-	de->ino = cpu_to_le32(parent->i_ino);
-	memcpy(d->filename[1], "..", 2);
-	set_de_type(de, parent->i_mode);
-
-	test_and_set_bit_le(0, (void *)d->bitmap);
-	test_and_set_bit_le(1, (void *)d->bitmap);
 }
 
 static int make_empty_dir(struct inode *inode,
@@ -578,7 +551,6 @@ start:
 		dentry_page = get_new_data_page(dir, NULL, block, true);
 		if (IS_ERR(dentry_page)) {
 			err = PTR_ERR(dentry_page);
-			goto out;
 		}
 
 		dentry_blk = kmap(dentry_page);

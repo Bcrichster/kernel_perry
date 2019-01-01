@@ -83,16 +83,6 @@ static inline void copy_node_info(struct node_info *dst,
 	/* should not copy flag here */
 }
 
-static inline void copy_node_info(struct node_info *dst,
-						struct node_info *src)
-{
-	dst->nid = src->nid;
-	dst->ino = src->ino;
-	dst->blk_addr = src->blk_addr;
-	dst->version = src->version;
-	/* should not copy flag here */
-}
-
 static inline void set_nat_flag(struct nat_entry *ne,
 				unsigned int type, bool set)
 {

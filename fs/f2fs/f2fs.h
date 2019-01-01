@@ -257,12 +257,6 @@ enum {
 #define DEF_CP_INTERVAL			60	/* 60 secs */
 #define DEF_IDLE_INTERVAL		5	/* 5 secs */
 
-#define DEF_BATCHED_TRIM_SECTIONS	32
-#define BATCHED_TRIM_SEGMENTS(sbi)	\
-		(SM_I(sbi)->trim_sections * (sbi)->segs_per_sec)
-#define BATCHED_TRIM_BLOCKS(sbi)	\
-		(BATCHED_TRIM_SEGMENTS(sbi) << (sbi)->log_blocks_per_seg)
-
 struct cp_control {
 	int reason;
 	__u64 trim_start;
@@ -668,13 +662,6 @@ enum {
 #define F2FS_MAP_FLAGS		(F2FS_MAP_NEW | F2FS_MAP_MAPPED |\
 				F2FS_MAP_UNWRITTEN)
 
-struct f2fs_map_blocks {
-	block_t m_pblk;
-	block_t m_lblk;
-	unsigned int m_len;
-	unsigned int m_flags;
-};
-
 /* for flag in get_data_block */
 #define F2FS_GET_BLOCK_READ		0
 #define F2FS_GET_BLOCK_DIO		1
@@ -961,9 +948,6 @@ struct f2fs_sm_info {
 	/* for batched trimming */
 	unsigned int trim_sections;		/* # of sections to trim */
 
-	/* for batched trimming */
-	unsigned int trim_sections;		/* # of sections to trim */
-
 	struct list_head sit_entry_set;	/* sit entry set list */
 
 	unsigned int ipu_policy;	/* in-place-update policy */
@@ -996,6 +980,9 @@ enum count_type {
 	F2FS_DIRTY_NODES,
 	F2FS_DIRTY_META,
 	F2FS_INMEM_PAGES,
+	F2FS_DIRTY_IMETA,
+	F2FS_WB_CP_DATA,
+	F2FS_WB_DATA,
 	NR_COUNT_TYPE,
 };
 
@@ -1202,14 +1189,6 @@ struct f2fs_sb_info {
 	atomic_t total_ext_tree;		/* extent tree count */
 	struct list_head zombie_list;		/* extent zombie tree list */
 	atomic_t total_zombie_tree;		/* extent zombie tree count */
-	atomic_t total_ext_node;		/* extent info count */
-
-	/* for extent tree cache */
-	struct radix_tree_root extent_tree_root;/* cache extent cache entries */
-	struct rw_semaphore extent_tree_lock;	/* locking extent radix tree */
-	struct list_head extent_list;		/* lru list for shrinker */
-	spinlock_t extent_lock;			/* locking extent lru list */
-	int total_ext_tree;			/* extent tree count */
 	atomic_t total_ext_node;		/* extent info count */
 
 	/* basic filesystem units */
@@ -2095,24 +2074,6 @@ static inline void f2fs_radix_tree_insert(struct radix_tree_root *root,
 		cond_resched();
 }
 
-static inline struct bio *f2fs_bio_alloc(int npages)
-{
-	struct bio *bio;
-
-	/* No failure on bio allocation */
-	bio = bio_alloc(GFP_NOIO, npages);
-	if (!bio)
-		bio = bio_alloc(GFP_NOIO | __GFP_NOFAIL, npages);
-	return bio;
-}
-
-static inline void f2fs_radix_tree_insert(struct radix_tree_root *root,
-				unsigned long index, void *item)
-{
-	while (radix_tree_insert(root, index, item))
-		cond_resched();
-}
-
 #define RAW_IS_INODE(p)	((p)->footer.nid == (p)->footer.ino)
 
 static inline bool IS_INODE(struct page *page)
@@ -2444,22 +2405,6 @@ static inline int f2fs_has_inline_dots(struct inode *inode)
 	return is_inode_flag_set(inode, FI_INLINE_DOTS);
 }
 
-static inline void f2fs_clear_inline_inode(struct inode *inode)
-{
-	clear_inode_flag(F2FS_I(inode), FI_INLINE_DATA);
-	clear_inode_flag(F2FS_I(inode), FI_DATA_EXIST);
-}
-
-static inline int f2fs_exist_data(struct inode *inode)
-{
-	return is_inode_flag_set(F2FS_I(inode), FI_DATA_EXIST);
-}
-
-static inline int f2fs_has_inline_dots(struct inode *inode)
-{
-	return is_inode_flag_set(F2FS_I(inode), FI_INLINE_DOTS);
-}
-
 static inline bool f2fs_is_atomic_file(struct inode *inode)
 {
 	return is_inode_flag_set(inode, FI_ATOMIC_FILE);
@@ -2617,28 +2562,6 @@ static inline int f2fs_sb_has_flexible_inline_xattr(struct super_block *sb);
 static inline int get_inline_xattr_addrs(struct inode *inode)
 {
 	return F2FS_I(inode)->i_inline_xattr_size;
-}
-
-static inline bool is_dot_dotdot(const struct qstr *str)
-{
-	if (str->len == 1 && str->name[0] == '.')
-		return true;
-
-	if (str->len == 2 && str->name[0] == '.' && str->name[1] == '.')
-		return true;
-
-	return false;
-}
-
-static inline bool f2fs_may_extent_tree(struct inode *inode)
-{
-	mode_t mode = inode->i_mode;
-
-	if (!test_opt(F2FS_I_SB(inode), EXTENT_CACHE) ||
-			is_inode_flag_set(F2FS_I(inode), FI_NO_EXTENT))
-		return false;
-
-	return S_ISREG(mode);
 }
 
 static inline void *f2fs_kvmalloc(size_t size, gfp_t flags)
