@@ -1366,7 +1366,7 @@ static struct buffer_head * ext4_find_entry (struct inode *dir,
 	if (ext4_has_inline_data(dir)) {
 		int has_inline_data = 1;
 		ret = ext4_find_inline_entry(dir, &fname, d_name, res_dir,
-					     &has_inline_data);
+					     &has_inline_data, flags);
 		if (has_inline_data) {
 			if (inlined)
 				*inlined = 1;
@@ -1462,7 +1462,7 @@ restart:
 		}
 		set_buffer_verified(bh);
 		i = search_dirblock(bh, dir, &fname, d_name,
-			    block << EXT4_BLOCK_SIZE_BITS(sb), res_dir);
+			    block << EXT4_BLOCK_SIZE_BITS(sb), res_dir, flags);
 		if (i == 1) {
 			EXT4_I(dir)->i_dir_start_lookup = block;
 			ret = bh;
@@ -1521,7 +1521,7 @@ static struct buffer_head * ext4_dx_find_entry(struct inode *dir,
 
 		retval = search_dirblock(bh, dir, fname, d_name,
 					 block << EXT4_BLOCK_SIZE_BITS(sb),
-					 res_dir, flags);
+					 res_dir);
 		if (retval == 1)
 			goto success;
 		brelse(bh);
