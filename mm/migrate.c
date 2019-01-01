@@ -94,9 +94,7 @@ void putback_movable_pages(struct list_head *l)
 		list_del(&page->lru);
 		dec_zone_page_state(page, NR_ISOLATED_ANON +
 				page_is_file_cache(page));
-		if (unlikely(mobile_page(page)))
-			mobilepage_putback(page);
-		else if (unlikely(isolated_balloon_page(page)))
+		if (unlikely(isolated_balloon_page(page)))
 			balloon_page_putback(page);
 		else
 			putback_lru_page(page);
@@ -987,18 +985,6 @@ static int unmap_and_move(new_page_t get_new_page, free_page_t put_new_page,
 
 	rc = __unmap_and_move(page, newpage, force, mode);
 
-	if (unlikely(rc == MIGRATEPAGE_MOBILE_SUCCESS)) {
-		/*
-		 * A mobile page has been migrated already.
-		 * Now, it's the time to wrap-up counters,
-		 * handle the page back to Buddy and return.
-		 */
-		dec_zone_page_state(page, NR_ISOLATED_ANON +
-				    page_is_file_cache(page));
-		mobilepage_free(page);
-		rc = MIGRATEPAGE_SUCCESS;
-		goto complete;
-	}
 out:
 	if (rc != -EAGAIN) {
 		/*
